@@ -1,0 +1,215 @@
+Experiment 5:
+1 part:
+import java.io.*;
+
+// Define the Student class
+class Student implements Serializable {
+    private int id;
+    private String name;
+    private double gpa;
+
+    // Constructor to initialize Student object
+    public Student(int id, String name, double gpa) {
+        this.id = id;
+        this.name = name;
+        this.gpa = gpa;
+    }
+
+    // Getter methods
+    public int getId() {
+        return id;
+    }
+
+    public String getName() {
+        return name;
+    }
+
+    public double getGpa() {
+        return gpa;
+    }
+
+    // toString method to display student details
+    @Override
+    public String toString() {
+        return "Student [ID=" + id + ", Name=" + name + ", GPA=" + gpa + "]";
+    }
+}
+
+public class StudentSerialization {
+
+    // Method to serialize a student object
+    public static void serializeStudent(Student student) {
+        try (ObjectOutputStream out = new ObjectOutputStream(new FileOutputStream("student_data.ser"))) {
+            out.writeObject(student);
+            System.out.println("Student has been serialized successfully.");
+        } catch (FileNotFoundException e) {
+            System.err.println("Error: The file was not found. " + e.getMessage());
+        } catch (IOException e) {
+            System.err.println("Error during serialization: " + e.getMessage());
+        }
+    }
+
+    // Method to deserialize the student object from a file
+    public static Student deserializeStudent() {
+        Student student = null;
+        try (ObjectInputStream in = new ObjectInputStream(new FileInputStream("student_data.ser"))) {
+            student = (Student) in.readObject();
+            System.out.println("Student has been deserialized successfully.");
+        } catch (FileNotFoundException e) {
+            System.err.println("Error: The file was not found. " + e.getMessage());
+        } catch (IOException e) {
+            System.err.println("Error during deserialization: " + e.getMessage());
+        } catch (ClassNotFoundException e) {
+            System.err.println("Error: Class not found. " + e.getMessage());
+        }
+        return student;
+    }
+
+    public static void main(String[] args) {
+        // Create a student object
+        Student student = new Student(101, "Alice Johnson", 7.9);
+
+        // Serialize the student object
+        serializeStudent(student);
+
+        // Deserialize the student object and display details
+        Student deserializedStudent = deserializeStudent();
+        if (deserializedStudent != null) {
+            System.out.println("Deserialized Student Details: " + deserializedStudent);
+        }
+    }
+}
+
+2 Part:
+
+import java.io.*;
+import java.util.*;
+
+// Employee class to store employee details
+class Employee implements Serializable {
+    private String name;
+    private int id;
+    private String designation;
+    private double salary;
+
+    // Constructor to initialize Employee object
+    public Employee(String name, int id, String designation, double salary) {
+        this.name = name;
+        this.id = id;
+        this.designation = designation;
+        this.salary = salary;
+    }
+
+    // Getter methods
+    public String getName() {
+        return name;
+    }
+
+    public int getId() {
+        return id;
+    }
+
+    public String getDesignation() {
+        return designation;
+    }
+
+    public double getSalary() {
+        return salary;
+    }
+
+    @Override
+    public String toString() {
+        return "ID: " + id + ", Name: " + name + ", Designation: " + designation + ", Salary: " + salary;
+    }
+}
+
+public class EmployeeManagementSystem {
+
+    private static final String FILE_NAME = "employee_data.ser";
+
+    // Method to add an employee to the list and serialize
+    private static void addEmployee(List<Employee> employeeList) {
+        Scanner scanner = new Scanner(System.in);
+
+        System.out.print("Enter Employee Name: ");
+        String name = scanner.nextLine();
+
+        System.out.print("Enter Employee ID: ");
+        int id = scanner.nextInt();
+        scanner.nextLine();  // Consume newline left by nextInt()
+
+        System.out.print("Enter Employee Designation: ");
+        String designation = scanner.nextLine();
+
+        System.out.print("Enter Employee Salary: ");
+        double salary = scanner.nextDouble();
+
+        // Create a new employee and add it to the list
+        Employee newEmployee = new Employee(name, id, designation, salary);
+        employeeList.add(newEmployee);
+
+        // Serialize the list of employees to file
+        try (ObjectOutputStream out = new ObjectOutputStream(new FileOutputStream(FILE_NAME))) {
+            out.writeObject(employeeList);
+            System.out.println("Employee added and data serialized successfully.");
+        } catch (IOException e) {
+            System.err.println("Error while serializing employee data: " + e.getMessage());
+        }
+    }
+
+    // Method to display all employees from the file
+    private static void displayAllEmployees() {
+        try (ObjectInputStream in = new ObjectInputStream(new FileInputStream(FILE_NAME))) {
+            List<Employee> employeeList = (List<Employee>) in.readObject();
+
+            if (employeeList.isEmpty()) {
+                System.out.println("No employees found.");
+            } else {
+                System.out.println("\nEmployee Details:");
+                for (Employee employee : employeeList) {
+                    System.out.println(employee);
+                }
+            }
+        } catch (FileNotFoundException e) {
+            System.out.println("No employee data found. Please add an employee first.");
+        } catch (IOException | ClassNotFoundException e) {
+            System.err.println("Error while reading employee data: " + e.getMessage());
+        }
+    }
+
+    // Method to display the menu and handle user input
+    private static void showMenu() {
+        Scanner scanner = new Scanner(System.in);
+        List<Employee> employeeList = new ArrayList<>();
+
+        while (true) {
+            // Display menu options
+            System.out.println("\nEmployee Management System");
+            System.out.println("1. Add an Employee");
+            System.out.println("2. Display All Employees");
+            System.out.println("3. Exit");
+            System.out.print("Enter your choice: ");
+
+            int choice = scanner.nextInt();
+
+            switch (choice) {
+                case 1:
+                    addEmployee(employeeList);  // Add employee to list
+                    break;
+                case 2:
+                    displayAllEmployees();  // Display all employees
+                    break;
+                case 3:
+                    System.out.println("Exiting application. Goodbye!");
+                    return;  // Exit the application
+                default:
+                    System.out.println("Invalid choice. Please try again.");
+            }
+        }
+    }
+
+    public static void main(String[] args) {
+        showMenu();  // Start the menu
+    }
+}
+
